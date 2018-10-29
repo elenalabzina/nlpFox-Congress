@@ -1,0 +1,4 @@
+-- apply the same steps (as in text_vectorization.ipynb) to your data (please, upload the data you use for training, or if it is too large provide a link);
+-- save the result matrix for the deathpenalty dataset in the outputs folder;
+-- save the result matrix for your data in outputs as welll
+-- you will find the same task in the tasks folder, please, provide your comments there (if any)
