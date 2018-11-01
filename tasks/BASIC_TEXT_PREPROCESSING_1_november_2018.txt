@@ -11,7 +11,7 @@ provided in text_vectorization.ipynb.
 
    schema for congressional speeches:
    <senator code*> , <date>**, <text of the speech WITHOUT COMMAS> 
-   * like H_IN_HOLMAN_1859_1859_0055 - don't parse it so far keep it the way it is for now
+   * i.e H_IN_HOLMAN_1859_1859_0055 - don't parse it so far; keep it the way it is for now
    ** don't parse, just collect the way it is, i.e 1859-01-01
    
    schema for channel transcripts:
