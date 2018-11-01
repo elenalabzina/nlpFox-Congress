@@ -1,0 +1,28 @@
+BASIC TEXT PREPROCESSING
+
+EXISTING INPUT: MULTIPLE FILES with congressional speeches (with a small flaw in their formatting) 
+and news transcripts (highly unstructured)
+
+DESIRED OUTPUT: ONE (or maybe more than ONE but not as many as now) CSV FILE for congressional speeches and 
+news transcripts for each channel well structured and that can be directly supplied to the code 
+provided in text_vectorization.ipynb. 
+
+(keep only data for 2005-2012)
+
+   schema for congressional speeches:
+   <senator code*> , <date>**, <text of the speech WITHOUT COMMAS> 
+   * like H_IN_HOLMAN_1859_1859_0055 - don't parse it so far keep it the way it is for now
+   ** don't parse, just collect the way it is, i.e 1859-01-01
+   
+   schema for channel transcripts:
+   <date in the same format as **>, <all transcripts for this date for this channel without commas>
+  
+Links with data:
+
+Here are the congressional speeches:
+https://www.dropbox.com/s/vdo3y5r4awf4lz3/speechessegmented.
+tar.gz?dl=0
+Here are the news transcripts:
+https://www.dropbox.com/sh/xbdy2773w1t8a43/AACjWYUDiH65ZQBATsZcB9dYa?dl=0
+
+
