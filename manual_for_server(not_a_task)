@@ -1,0 +1,145 @@
+1. (URBAN)
+
+Please find attached two scripts. The first, job-pg-setup.sh, is used to initialize a DBMS in a directory. It uses $HOME/pg by default, but it should be changed to something in your /cluster/work volume. The script creates the "postgres" DB admin user and stores the password in $PGDATA/postgres.pass. The server is setup to allow md5 authentication of DB-defined users over the network.
+
+The second script, job-pg-server.sh, is used to run the DBMS within a batch job. Once the server is started in writes the connection information to a file ($HOME/pg.env by default—again, you should change this for a multi-user setup). You can source this file so, for example, you can then connect to the DBMS using psql, for example. Other programs/scripts can also make use of the environment variables. You can submit the script using
+bsub -J db -R "rusage[mem=8192]" -W 120:00 -R light < ./job-pg-server.sh
+If you want a whole chain of jobs to follow each other, then simply chain subsequent ones using dependencies:
+bsub -J db -R "rusage[mem=8192]" -W 120:00 -R light < ./job-pg-server.sh
+bsub -J db -R "rusage[mem=8192]" -W 120:00 -R light -w "ended(db)" < ./job-pg-server.sh
+bsub -J db -R "rusage[mem=8192]" -W 120:00 -R light -w "ended(db)" < ./job-pg-server.sh
+bsub -J db -R "rusage[mem=8192]" -W 120:00 -R light -w "ended(db)" < ./job-pg-server.sh
+#...and so on
+This means that you will mostly have a DB server running continuously.
+
+
+2. (URBAN)
+Thank you for the reply. I agree it is frustrating when the mail system removes attachments (.sh, .exe, …). It should leave ZIPs alone, so please find them there. Otherwise, you can copy-paste from below.
+
+Here is “job-pg-setup.sh”,
+​#!/bin/sh
+
+# Makes sure that the postgresql commands are available.
+which pg_ctl 2> /dev/null || module load postgresql
+
+# Set up DBMS
+
+# Prepare the environment
+PGDATA=$HOME/pg
+export PGDATA
+PASSFILE=$(mktemp)
+dd if=/dev/urandom of=/dev/stdout bs=16 count=1 2> /dev/null | base64 > $PASSFILE
+
+initdb -U postgres --pwfile=$PASSFILE -D $PGDATA
+
+mv $PASSFILE $PGDATA/postgres.pass
+
+
+## Configure DBMS
+
+# Let users connect from network
+cat >> $PGDATA/pg_hba.conf <<EOF
+host    all             all         0.0.0.0/0               md5
+EOF
+
+#Allow network connections in postgresql.conf:
+cat >> $PGDATA/postgresql.conf <<EOF
+listen_addresses = '*'
+EOF
+
+And “job-pg-server.sh”,
+#!/bin/sh
+
+if [ -z "$LSB_JOBID" ]; then
+    echo "This script can only run within an LSF job."
+    exit 1
+fi
+
+# Makes sure that the postgresql commands are available.
+which pg_ctl 2> /dev/null || module load postgresql
+
+# Attempt to stop the server cleanly upon job termination.
+function stop_pg() {
+    pg_ctl stop
+}
+trap stop_pg SIGINT SIGTERM SIGKILL
+
+# Try to load the previous environment
+__PGENV=$HOME/pg.env
+if [ -r $__PGENV ]; then
+    . $__PGENV
+fi
+# Check if the server is already running. Start it up if it not yet running.
+if pg_ctl status > /dev/null 2>&1; then
+    echo Server already running.
+else
+    PGDATA=$HOME/pg
+    if [ -e $PGDATA/postmaster.pid ]; then
+        echo "PostgreSQL may be running on another host."
+        echo "Running multiple PostgreSQL instances can"
+    echo "cause irreversible data corruption."
+    echo "If you are sure no PostgreSQL is running,"
+    echo "in $PGDATA then delete the"
+    echo "$PGDATA/postmaster.pid"
+    echo "file and try again."
+    return 1
+    fi
+    PGPORT=$(($RANDOM%64001+1024))
+    export PGDATA PGPORT
+    pg_ctl start
+    sleep 5
+fi
+# Save server data if it is running correctly.
+if pg_ctl status > /dev/null 2>&1; then {
+    echo PGHOST=$HOSTNAME
+    echo PGDATA=$PGDATA
+    echo PGPORT=$PGPORT
+    echo export PGHOST PGDATA PGPORT
+} > $__PGENV
+    echo "PostgreSQL started successfully."
+    echo "Use . $__PGENV to get connection data."
+    while [ -e $PGDATA/postmaster.pid -a -d "/proc/$(head -n 1 $PGDATA/postmaster.pid)" ]; do
+        sleep 300
+    done
+else
+    rm $__PGENV 2> /dev/null
+    # Return the error code.
+    pg_ctl status
+fi
+
+
+3. (CHRISTOPH)
+For python, installing modules works like this:
+
+# change to home directory
+cd $HOME/python
+# create directory for your own modules
+mkdir -p lib64/python3.6/site-packages
+# export path
+export PYTHONPATH=$HOME/python/lib64/python3.6/site-packages:$PYTHONPATH
+# load python
+module load gcc/6.3.0 python_cpu/3.6.4
+# upgrade pip
+pip install --user --upgrade pip
+
+and then install the modules, e.g. like this:
+
+python -m pip install --user psycopg2-binary
+
+On a general basis, it is good to add
+
+module load gcc/6.3.0 python_cpu/3.6.4
+module load gcc/6.3.0 postgresql/9.5.3
+
+to your .bash_profile in the home folder. This uses the latest available gcc that incorporates python 3.6.4
+
+After creating a db with the script provided by Urban, you should always first source the environment variables (saved in pg.env file) before doing anything with the DB:
+
+source /cluster/work/lawecon/PATH-TO-DATABASE-FOLDER/pg.env 
+
+Then you can connect via:
+
+psql -h $PGHOST -p $PGPORT -U postgres -d NAME-OF-DATABASE
+
+
+
