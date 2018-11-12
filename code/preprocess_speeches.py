@@ -14,7 +14,8 @@ def preprocess_files():
     os.chdir(input_path)
     w = csv.writer(f)
     w.writerow(['senator code', 'date', 'text'])
-    translator = str.maketrans('', '', string.punctuation)
+    to_be_removed=string.punctuation+"\n\t\r"
+    translator = str.maketrans('', '', to_be_removed)
     senator_date=dict()
     for file in glob.glob("*.csv"):
         with open(file) as csv_file:
@@ -37,6 +38,6 @@ def preprocess_files():
 
 
 
-# preprocess_files()
+preprocess_files()
 
 
