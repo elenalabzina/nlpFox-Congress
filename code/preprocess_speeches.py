@@ -1,7 +1,7 @@
 import csv, sys
 import os, glob
 import string
-import pandas as pd
+import re
 
 output_path = '/home/romina/Documents/work/Speeches_mining/outputs'
 input_path = '/home/romina/Documents/work/speeches-segmented/greg-tables'
@@ -13,31 +13,35 @@ def preprocess_files():
     f = open('output.csv', 'w')
     os.chdir(input_path)
     w = csv.writer(f)
-    w.writerow(['senator code', 'date', 'text'])
-    to_be_removed=string.punctuation+"\n\t\r"
-    translator = str.maketrans('', '', to_be_removed)
-    senator_date=dict()
+    w.writerow(['senator code', 'date', 'senator term', 'speech number', 'text'])
+    translator = str.maketrans('', '', string.punctuation)
+    senator_date = dict()
     for file in glob.glob("*.csv"):
         with open(file) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             file_year = int(csv_file.name.split('-')[0])
             if file_year < 2005 or file_year > 2012:
                 continue
+            print(csv_file.name)
             for row in csv_reader:
-                temp=str(row[0]).split('_')
-                senator_code=temp[0]+"_"+temp[1]+"_"+temp[2]
+                temp = str(row[0]).split('_')
+                term = temp[3] + "_" + temp[4]
+                speech_number = temp[5]
+                senator_code = temp[0] + "_" + temp[1] + "_" + temp[2]
                 date = row[2]
                 text = row[3].translate(translator)
-                if (senator_code,date) not in senator_date.keys():
-                    senator_date[(senator_code,date)]=text
+                text = re.sub(r'\s', ' ', text)
+                if (senator_code, date) not in senator_date.keys():
+                    senator_date[(senator_code, date)] = {'text': text, 'term': term,
+                                                          'speech_number': speech_number}
                 else:
-                    senator_date[(senator_code, date)] += " "+text
+                    senator_date[(senator_code, date)]['text'] += " " + text
+                    senator_date[(senator_code, date)]['term'] += "; " + term
+                    senator_date[(senator_code, date)]['speech_number'] += '; ' + speech_number
 
-    for key,value in senator_date.items():
-        w.writerow([key[0], key[1], value])
-
+    for key, value in senator_date.items():
+        text = re.sub(' +', ' ', value['text'])
+        w.writerow([key[0], key[1], value['term'], value['speech_number'], text])
 
 
 preprocess_files()
-
-
