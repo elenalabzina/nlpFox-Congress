@@ -1,2 +1,3 @@
-# deconfounderNLP
-I uploaded the code for basic preprocessing. Unfortunatly Github has a limitation for uploading file (up to  Mb) so I can not upload the output.
+For the detailed information about this project check this documents, check the relavant Dropbox document. The link is available in the designated Slack channel.  
+
+
