@@ -13,7 +13,7 @@ def preprocess_files():
     f = open('output.csv', 'w')
     os.chdir(input_path)
     w = csv.writer(f)
-    w.writerow(['senator code', 'date', 'senator term', 'speech number', 'text'])
+    w.writerow(['senator_code', 'date', 'senator_term', 'speech_number', 'text'])
     translator = str.maketrans('', '', string.punctuation)
     senator_date = dict()
     for file in glob.glob("*.csv"):
