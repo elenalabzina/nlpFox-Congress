@@ -10,11 +10,11 @@ import pandas as pd
 from nltk.probability import FreqDist
 from statistics import mean, pstdev,median
 
-output_path = '/cluster/work/lawecon/Projects/Fox-CongressSpeeches/Output/transcripts'
+output_path = 'output'
 
 os.chdir(output_path)
 
-output = open('FNC_transcripts_by_year_2005_12.csv', 'r')
+output = open('CNN_transcripts_by_year_2005_12.csv', 'r')
 data = pd.read_csv(output, encoding='utf-8')
 text = pd.DataFrame(data[['text']])
 data = list()
@@ -67,8 +67,8 @@ for index in range(0, len(text_trigram)):
             binary_matrix[index, selected_trigrams.index(token)] = 1
             frequency_matrix[index, selected_trigrams.index(token)] = text_trigram[index].count(token)
 
-np.savetxt("FNC_transcripts_by_year_2005_12_binary.csv", binary_matrix.astype(int), fmt='%i', delimiter=",")
-np.savetxt("FNC_transcripts_by_year_2005_12_frequency.csv", frequency_matrix.astype(int), fmt='%i', delimiter=",")
+np.savetxt("CNN_transcripts_by_year_2005_12_binary.csv", binary_matrix.astype(int), fmt='%i', delimiter=",")
+np.savetxt("CNN_transcripts_by_year_2005_12_frequency.csv", frequency_matrix.astype(int), fmt='%i', delimiter=",")
 
 mu = mean(selected_trigrams_count)
 st = pstdev(selected_trigrams_count, mu)
@@ -77,7 +77,7 @@ maxium=max(selected_trigrams_count)
 f = open('FNC_transcripts_by_year_2005_12_trigrams_position.csv', 'w')
 w = csv.writer(f)
 w.writerow(['mean , stdev', mu, st])
-w.wrtierow(['median, max ',med,maxium])
+w.writerow(['median, max ',med,maxium])
 w.writerow(['position', 'trigrams', 'count'])
 for index in range(len(selected_trigrams)):
     w.writerow([index, selected_trigrams[index], selected_trigrams_count[index]])

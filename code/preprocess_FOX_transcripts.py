@@ -27,8 +27,6 @@ def preprocess():
             segments = re.split(r'\d+ of \d+ DOCUMENTS', content)[1:]
             count = 0
             for text in segments:
-                count = count + 1
-                print(count)
                 # first line which the main text starts
                 start = text.index('LENGTH') + 6 + 13
                 # end of the main text
@@ -75,7 +73,7 @@ def preprocess():
 
 def write(to_write):
     os.chdir(output_path)
-    f = open('FNC_transcripts_2005_12.csv', 'w')
+    f = open('FNC_transcripts_by_year_2005_12.csv', 'w')
     w = csv.writer(f)
     w.writerow(['date', 'text'])
     for date, text in to_write.items():

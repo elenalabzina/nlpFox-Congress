@@ -3,14 +3,14 @@ import os, glob
 import string
 import re
 
-output_path = '/home/romina/Documents/work/Speeches_mining/outputs'
-input_path = '/home/romina/Documents/work/speeches-segmented/greg-tables'
+output_path = '../outputs'
+input_path = '../data/congress_speeches'
 
 
 def preprocess_files():
     csv.field_size_limit(sys.maxsize)
     os.chdir(output_path)
-    f = open('output.csv', 'w')
+    f = open('speeches_2005_12_full.csv', 'w')
     os.chdir(input_path)
     w = csv.writer(f)
     w.writerow(['senator_code', 'date', 'senator_term', 'speech_number', 'text'])
