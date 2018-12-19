@@ -5,10 +5,12 @@ from time import strptime
 from nltk import sent_tokenize
 
 output_path = '/home/romina/Documents/work/Speeches_mining/outputs'
-input_path = '/home/romina/Documents/work/transcripts_mining/transcripts/FNC'
-input_directory = ['Fox News Edge', 'Fox News Sunday', 'Glenn Beck', 'Hannity', 'On the Record with Greta van Susteren'
-    , 'O\'Reilly Factor', 'Special Report with Bret Baier', 'Special Report with Brit Hume', 'The Edge with Paula Zahn',
-                   'The Five', 'The Kelly File', 'Your World with Neil Cavuto']
+input_path = '/home/romina/Documents/work/transcripts_mining/transcripts/MSNBC'
+input_directory = ['All In with Chris Hayes', 'Ashleigh Banfield On Location', 'Buchanan & Press', 'Countdown with Keith Olbermann', 'Donahue'
+    , 'Hardball with Chris Matthews', 'Live with Dan Abrams', 'Morning Joe', 'Politics Nation',
+                   'Race for the White House and 1600 Pennsylvania Ave', 'Rita Cosby Live and Direct',
+                   'Scarborough Country','The Ed Show','The Last Word with Lawrence O\'Donnell','The News with Brian Williams',
+                   'The Rachel Maddow Show','The Savage Nation','Tucker']
 
 
 def preprocess():
@@ -24,7 +26,6 @@ def preprocess():
             if year < 2005 or year > 2012:
                 continue
             print(file.name)
-
             content = file.read()
             # to split each document : they have this pattern in the first line 1 of 415 DOCUMENTS
             segments = re.split(r'\d+ of \d+ DOCUMENTS', content)[1:]
@@ -80,7 +81,7 @@ def preprocess():
 
 def write(to_write):
     os.chdir(output_path)
-    f = open('FNC_transcripts_by_day_2005_12.csv', 'w')
+    f = open('MSNBC_transcripts_by_day_2005_12.csv', 'w')
     w = csv.writer(f)
     w.writerow(['date', 'text'])
     for date, text in to_write.items():

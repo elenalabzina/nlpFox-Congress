@@ -1,6 +1,9 @@
 import os, string
-import re, glob, csv, sys
+import re, glob, csv,sys
+from time import strptime
+
 from nltk import sent_tokenize
+
 
 output_path = '/home/romina/Documents/work/Speeches_mining/outputs'
 input_path = '/home/romina/Documents/work/transcripts_mining/transcripts/CNN'
@@ -11,45 +14,50 @@ input_directory = ['Anderson Cooper 360', 'Campbell Brown', 'CNN Live Today', 'C
                    'Piers Morgan', 'The Point with Greta Van Susteren', 'The Situation Room with Wolf Blitzer',
                    'Wolf Blitzer Reports']
 
-
 def preprocess():
     csv.field_size_limit(sys.maxsize)
+    date_text=dict()
     translator = str.maketrans('', '', string.punctuation)
-    # for i in range(len(input_directory)):
-    for i in range(1):
+    for i in range(len(input_directory)):
         os.chdir(input_path + '/' + input_directory[i])
-        date_text = dict()
         for txt_file in glob.glob("*.txt"):
             file = open(txt_file, 'r')
-            print(file.name)
             # find year by file name to avoid useless processing
-            year = int(re.findall(r'_\d+', file.name)[0][1:])
+            year = int(re.findall(r'\d+', file.name)[0])
             if year < 2005 or year > 2012:
                 continue
+            print(file.name)
+
             content = file.read()
             # to split each document : they have this pattern in the first line 1 of 415 DOCUMENTS
             segments = re.split(r'\d+ of \d+ DOCUMENTS', content)[1:]
-            count = 0
             for text in segments:
                 # first line which the main text starts
                 start = text.index('LENGTH') + 6 + 13
                 # end of the main text
                 end = text.index('LOAD-DATE')
                 main_text = text[start:end]
+                date_line = text.split('\n')[5]
+                if len(date_line)==0:
+                    date_line = text.split('\n')[4]
+                dates = re.findall(r'[\w]+', date_line)
+                year=int(dates[2])
+                if year < 2005 or year > 2012:
+                    continue
+                month = dates[0]
+                month_num = strptime(month[:3], '%b').tm_mon
+                final_date = dates[2] + "-" + str(month_num) + "-" + dates[1]
                 enter_seperated_line = main_text.split('\n')
-                # without_speaker = re.sub(r'([A-Z]+\s*(\((\w|\s)+\))?\s*)+:', ' ', main_text_clean)
+                #without_speaker = re.sub(r'([A-Z]+\s*(\((\w|\s)+\))?\s*)+:', ' ', main_text_clean)
                 line_without_capital = ''
                 for lines in enter_seperated_line:
                     # redundant_details = re.search(r'\(([A-Z]+|\s*)+\)', l)
                     # line= re.sub(' +', ' ', l)
-                    # (CAMERA-ON)
                     if lines.isupper():
                         continue
                     all_lines = sent_tokenize(lines)
                     for line in all_lines:
-                        # I A DR.
-                        if line.isupper():
-                            continue
+
                         speakers = line.split(':')
                         is_speaker = False
                         if len(speakers) > 1:
@@ -71,22 +79,21 @@ def preprocess():
                 no_punc_text = line_without_capital.translate(translator)
                 clean_text = ' '.join(no_punc_text.split())
                 # for each date, merge all observations
-                if year not in date_text.keys():
-                    date_text[year] = clean_text
+                if final_date not in date_text.keys():
+                    date_text[final_date] = clean_text
                 else:
-                    date_text[year] += clean_text
+                    date_text[final_date] += clean_text
     return date_text
 
 
 def write(to_write):
     os.chdir(output_path)
-    f = open('CNN_transcripts_by_year_2005_12.csv', 'w')
+    f = open('CNN_transcripts_by_day_2005_12.csv', 'w')
     w = csv.writer(f)
     w.writerow(['date', 'text'])
     for date, text in to_write.items():
         print(date)
         w.writerow([date, text])
-
 
 date_text = preprocess()
 write(date_text)
