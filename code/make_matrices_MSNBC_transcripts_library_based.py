@@ -8,13 +8,13 @@ from nltk.tokenize import word_tokenize
 import nltk
 import pandas as pd
 from nltk.probability import FreqDist
-from statistics import mean, pstdev, median
+from statistics import mean, pstdev,median
 
 output_path = '/cluster/work/lawecon/Projects/Fox-CongressSpeeches/Output/transcripts'
 
 os.chdir(output_path)
 
-output = open('CNN_transcripts_by_day_2005_12.csv', 'r')
+output = open('MSNBC_transcripts_by_day_2005_12.csv', 'r')
 data = pd.read_csv(output, encoding='utf-8')
 text = pd.DataFrame(data[['text']])
 data = list()
@@ -22,7 +22,7 @@ for index, content in text.iterrows():
     data.append(content['text'])
 
 stemmer = SnowballStemmer("english", ignore_stopwords=True)
-# setting up and extending stopwords
+##setting up and extending stopwords
 stop = stopwords.words('english')
 stop.extend(
     ['nevertheless', 'would', 'nether''the', 'in', 'may', 'also', 'zero', 'one', 'two', 'three', 'four', 'five',
@@ -53,19 +53,12 @@ for token_group in tokens:
 
 total = len(all_trigrams)
 cutoff = 0.00001 * total
-# cutoff=10
+#cutoff=10
 fdist = FreqDist(all_trigrams)
 selected_trigrams = {k: v for k, v in fdist.items() if v > cutoff}
-# selected_trigrams_count = list(selected_trigrams.values())
+selected_trigrams_count = list(selected_trigrams.values())
 selected_trigrams = list(selected_trigrams.keys())
-f = open('CNN_transcripts_2007_trigrmas_frequency.csv', 'w')
-w = csv.writer(f)
-w.writerow(['trigrmas', 'count'])
-selected_trigrams_count = list()
-for k, v in fdist.items():
-    if v > cutoff:
-        selected_trigrams_count.append(v)
-        w.writerow([k, v])
+
 binary_matrix = np.zeros(shape=(len(text_trigram), len(selected_trigrams)))
 frequency_matrix = np.zeros(shape=(len(text_trigram), len(selected_trigrams)))
 
@@ -75,27 +68,27 @@ for index in range(0, len(text_trigram)):
             binary_matrix[index, selected_trigrams.index(token)] = 1
             frequency_matrix[index, selected_trigrams.index(token)] = text_trigram[index].count(token)
 
-f = open('CNN_transcripts_by_day_2005_12_binary.csv', 'w')
+
+f = open('MSNBC_transcripts_by_day_2005_12_binary.csv', 'w')
 w = csv.writer(f)
 for i in range(binary_matrix.shape[0]):
     w.writerow(list(map(int, binary_matrix[i])))
 
-f = open('CNN_transcripts_by_day_2005_12_frequency.csv', 'w')
+f = open('MSNBC_transcripts_by_day_2005_12_frequency.csv', 'w')
 w = csv.writer(f)
 for i in range(frequency_matrix.shape[0]):
     w.writerow(list(map(int, frequency_matrix[i])))
-
-# np.savetxt("CNN_transcripts_by_year_2007_binary.csv", binary_matrix.astype(int), fmt='%i', delimiter=",")
-# np.savetxt("CNN_transcripts_by_year_2007_frequency.csv", frequency_matrix.astype(int), fmt='%i', delimiter=",")
+#np.savetxt("FNC_transcripts_by_year_2007_binary.csv", binary_matrix.astype(int), fmt='%i', delimiter=",")
+#np.savetxt("FNC_transcripts_by_year_2007_frequency.csv", frequency_matrix.astype(int), fmt='%i', delimiter=",")
 
 mu = mean(selected_trigrams_count)
 st = pstdev(selected_trigrams_count, mu)
-med = median(selected_trigrams_count)
-maxium = max(selected_trigrams_count)
-f = open('CNN_transcripts_by_day_2005_12_trigrams_position.csv', 'w')
+med=median(selected_trigrams_count)
+maxium=max(selected_trigrams_count)
+f = open('MSNBC_transcripts_by_day_2005_12_trigrams_position.csv', 'w')
 w = csv.writer(f)
 w.writerow(['mean , stdev', mu, st])
-w.writerow(['median, max ', med, maxium])
+w.writerow(['median, max ',med,maxium])
 w.writerow(['position', 'trigrams', 'count'])
 for index in range(len(selected_trigrams)):
     w.writerow([index, selected_trigrams[index], selected_trigrams_count[index]])
