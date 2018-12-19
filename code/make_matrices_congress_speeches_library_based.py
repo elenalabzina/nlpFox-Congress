@@ -68,17 +68,17 @@ for index in range(0, len(text_trigram)):
             binary_matrix[index, selected_trigrams.index(token)] = 1
             frequency_matrix[index, selected_trigrams.index(token)] = text_trigram[index].count(token)
 
-np.savetxt("FNC_transcripts_by_year_2005_12_binary.csv", binary_matrix.astype(int), fmt='%i', delimiter=",")
-np.savetxt("FNC_transcripts_by_year_2005_12_frequency.csv", frequency_matrix.astype(int), fmt='%i', delimiter=",")
+np.savetxt("speeches_2005_12_binary.csv", binary_matrix.astype(int), fmt='%i', delimiter=",")
+np.savetxt("speeches_2005_12_frequency.csv", frequency_matrix.astype(int), fmt='%i', delimiter=",")
 
 mu = mean(selected_trigrams_count)
 st = pstdev(selected_trigrams_count, mu)
 med=median(selected_trigrams_count)
 maxium=max(selected_trigrams_count)
-f = open('FNC_transcripts_by_year_2005_12_trigrams_position.csv', 'w')
+f = open('speeches_2005_12_trigrams_position.csv', 'w')
 w = csv.writer(f)
 w.writerow(['mean , stdev', mu, st])
-w.wrtierow(['median, max ',med,maxium])
+w.writerow(['median, max ',med,maxium])
 w.writerow(['position', 'trigrams', 'count'])
 for index in range(len(selected_trigrams)):
     w.writerow([index, selected_trigrams[index], selected_trigrams_count[index]])

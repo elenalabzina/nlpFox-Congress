@@ -3,14 +3,14 @@ import os, glob
 import string
 import re
 
-output_path = '../outputs'
-input_path = '../data/congress_speeches'
+output_path = '/cluster/work/lawecon/Projects/Fox-CongressSpeeches/Output/congressional_speeches'
+input_path = '/cluster/work/lawecon/Projects/Fox-CongressSpeeches/Data/speeches-segmented/greg-tables'
 
 
 def preprocess_files():
     csv.field_size_limit(sys.maxsize)
     os.chdir(output_path)
-    f = open('speeches_2005_12_full.csv', 'w')
+    f = open('output.csv', 'w')
     os.chdir(input_path)
     w = csv.writer(f)
     w.writerow(['senator_code', 'date', 'senator_term', 'speech_number', 'text'])
